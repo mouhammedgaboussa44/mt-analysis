@@ -1,4 +1,4 @@
-import json, os, time, urllib.request
+import json, os, time, urllib.request, urllib.error
 from datetime import datetime, timezone
 
 TOKEN = os.environ["TELEGRAM_TOKEN"]
@@ -25,25 +25,33 @@ def save(path, obj):
 
 def post_json(url, body):
     req = urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "replace")[:400]
+        raise RuntimeError(f"HTTP {e.code}: {detail}")
 
 def tg(method, **params):
     res = post_json(f"https://api.telegram.org/bot{TOKEN}/{method}", params)
     return res.get("result")
 
+LAST_ERR = ""
+
 def analyze(text):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={KEY}"
+    global LAST_ERR
+    LAST_ERR = ""
     body = {"contents": [{"parts": [{"text": PROMPT + text[:4000]}]}],
             "generationConfig": {"responseMimeType": "application/json"}}
-    for attempt in range(2):
+    for model in [MODEL, "gemini-flash-latest"]:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={KEY}"
         try:
             res = post_json(url, body)
             raw = res["candidates"][0]["content"]["parts"][0]["text"]
             return json.loads(raw)
         except Exception as e:
-            print("gemini error:", e)
-            time.sleep(20)
+            LAST_ERR = f"[{model}] {e}"
+            print("gemini error:", LAST_ERR)
     return None
 
 def clean(d):
@@ -70,7 +78,10 @@ def on_message(m, uid, state):
         return
     card = clean(analyze(text))
     if not card:
-        tg("sendMessage", chat_id=CHAT, text="لم أستطع كتابة تحليل من هذا النص. أضف تفاصيل أو أعد الإرسال لاحقاً.")
+        msg = "لم أستطع كتابة تحليل من هذا النص. أضف تفاصيل أو أعد الإرسال لاحقاً."
+        if LAST_ERR:
+            msg = "خطأ من Gemini:\n" + LAST_ERR[:700]
+        tg("sendMessage", chat_id=CHAT, text=msg)
         return
     when = (m.get("forward_origin") or {}).get("date") or m["date"]
     card["id"] = str(uid)
