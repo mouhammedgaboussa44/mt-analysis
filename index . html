@@ -1,0 +1,84 @@
+<!-- الخريطة والرادار -->
+    <section>
+      <h2 class="section-title">رادار المدينة والتحكم</h2>
+      <div class="radar-container">
+        <div>
+          <h3>رادار السيرفر نشط</h3>
+          <p>المدينة تنتظرك، استعد لرصد التحركات الميدانية.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Mystery Town Analysis. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    // 1. عداد الدخول 0-100%
+    let count = 0;
+    const counterEl = document.getElementById('counter');
+    const preloaderEl = document.getElementById('preloader');
+
+    const loadInterval = setInterval(() => {
+      count += Math.floor(Math.random() * 10) + 5;
+      if (count >= 100) {
+        count = 100;
+        clearInterval(loadInterval);
+        setTimeout(() => {
+          preloaderEl.classList.add('fade-out');
+        }, 400);
+      }
+      counterEl.textContent = count + '%';
+    }, 40);
+
+    // 2. حساب وقت النشر
+    function timeAgo(dateString) {
+      if (!dateString) return 'منذ وقت قصير';
+      const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+      if (seconds < 60) return 'قبل لحظات';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return قبل ${minutes} دقيقة;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return قبل ${hours} ساعة;
+      const days = Math.floor(hours / 24);
+      return قبل ${days} يوم;
+    }
+
+    // 3. جلب الأخبار والبطاقات من posts.json
+    fetch('posts.json?' + Date.now())
+      .then(r => r.json())
+      .then(posts => {
+        const L = document.getElementById('list');
+        L.innerHTML = '';
+        
+        if (!posts || posts.length === 0) {
+          L.innerHTML = '<p style="color: var(--text-muted);">لا توجد تحليلات مسجلة حالياً.</p>';
+          return;
+        }
+
+        posts.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          let imageTag = p.image ? <img src="${p.image}" alt="مرفق"> : '';
+
+          card.innerHTML = 
+            <h3>${p.title || 'تحليل جديد'}</h3>
+            <p>${p.body || ''}</p>
+            ${imageTag}
+            <div class="meta-info">
+              <span class="k">${p.type || 'ARCHIVE'}</span>
+              <span class="ago">${timeAgo(p.time)}</span>
+            </div>
+          ;
+          L.appendChild(card);
+        });
+      })
+      .catch(() => {
+        document.getElementById('list').innerHTML = '<p style="color: var(--text-muted);">تعذّر تحميل البيانات حالياً.</p>';
+      });
+  </script>
+</body>
+</html>
