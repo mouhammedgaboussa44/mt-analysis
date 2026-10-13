@@ -1,96 +1,109 @@
-.then(function(r) { return r.json(); })
-      .then(function(posts) {
-        const L = document.getElementById('list');
-        L.innerHTML = '';
-        
-        if (!posts || posts.length === 0) {
-          L.innerHTML = '<p style="color: var(--text-muted);">لا توجد تحليلات مسجلة حالياً.</p>';
-          return;
-        }
+<!-- السلايدر التفاعلي العلوي -->
+    <div class="slider" id="sl">
+      <div class="n">01 / 01</div>
+      <h3>جاري تهيئة النظام...</h3>
+      <small>الآن</small>
+    </div>
+    <div class="dots" id="dots"></div>
 
-        posts.forEach(function(p) {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.dataset.t = (p.type  '') + ' ' + (p.certainty  '');
+    <!-- التبويبات والفلترة -->
+    <div class="tabs" id="tabs" style="margin-top: 30px;">
+      <div class="opt on" data-f="all">الكل</div>
+      <div class="opt" data-f="مؤكد">مؤكد</div>
+      <div class="opt" data-f="تحليل">تحليل</div>
+    </div>
 
-          let imageTag = '';
-          if (p.image) {
-            imageTag = <img src="${p.image}" alt="مرفق تحليل">;
-          }
+    <!-- الأرشيف والبطاقات -->
+    <div class="grid" id="arch">
+      <div id="list" class="loading-state">جاري جلب التحليلات من السيرفر...</div>
+    </div>
+  </div>
 
-          card.innerHTML = 
-            <h3>${p.title || 'حدث جديد'}</h3>
-            <p>${p.body || ''}</p>
-            ${imageTag}
-            <div class="meta-info">
-              <span class="k">${p.type || 'ARCHIVE'}</span>
-              <span class="ago">${timeAgo(p.time)}</span>
-            </div>
-          ;
-          L.appendChild(card);
-        });
+  <script>
+    // حساب الوقت المنقضي
+    function ago(t) {
+      if(!t) return '';
+      var s = Math.floor((new Date() - new Date(t)) / 1000);
+      if(s < 60) return 'منذ لحظات';
+      var m = Math.floor(s/60); if(m < 60) return 'منذ ' + m + ' دقيقة';
+      var h = Math.floor(m/60); if(h < 24) return 'منذ ' + h + ' ساعة';
+      return 'منذ ' + Math.floor(h/24) + ' يوم';
+    }
 
-        // تفعيل السلايدر والتبويبات والتفاعل الحركي الأصلي للموقع
-        initDynamicFeatures(L);
-      })
-      .catch(function() {
-        document.getElementById('list').innerHTML = '<p style="color: var(--text-muted);">تعذّر تحميل التحليلات حالياً.</p>';
-      });
-
-    function initDynamicFeatures(L) {
-      var cs = Array.prototype.slice.call(L.children);
-      if (cs.length === 0) return;
-
-      var si = 0;
-      var sl = document.getElementById('sl');
-      var dots = document.getElementById('dots');
-
-      cs.forEach(function() {
-        dots.appendChild(document.createElement('i'));
-      });
-
-      function show() {
-        if (!cs[si]) return;
-        var c = cs[si];
-        sl.innerHTML = '<div class="n">0' + (si + 1) + ' / 0' + cs.length + '</div><h3></h3><small></small>';
-        sl.querySelector('h3').textContent = c.querySelector('h3').textContent;
-        sl.querySelector('small').textContent = c.querySelector('.k').textContent + ' · ' + c.querySelector('.ago').textContent;
-        Array.prototype.forEach.call(dots.children, function(d, i) {
-          d.className = i === si ? 'on' : '';
-        });
+    // بناء الكروت وعرضها
+    function render(p) {
+      var L = document.getElementById('list');
+      L.innerHTML = '';
+      if(!p || p.length === 0) {
+        L.innerHTML = '<p style="color:var(--muted); text-align:center;">لا توجد تحليلات مسجلة حالياً.</p>';
+        return;
       }
-
-      show();
-      
-      var sliderTimer = setInterval(function() {
-        si = (si + 1) % cs.length;
-        show();
-      }, 4000);
-
-      sl.addEventListener('click', function() {
-        si = (si + 1) % cs.length;
-        show();
-      });
-
-      // نظام التبويبات والتصفية
-      document.getElementById('tabs').addEventListener('click', function(e) {
-        var b = e.target.closest('.opt');
-        if (!b) return;
-        document.querySelectorAll('.opt').forEach(function(c) { c.classList.toggle('on', c === b); });
-        var f = b.dataset.f;
-        cs.forEach(function(c) {
-          c.style.display = (f === 'all' || c.dataset.t.indexOf(f) > -1) ? '' : 'none';
-        });
-        document.getElementById('arch').scrollIntoView({ behavior: 'smooth' });
-      });
-
-      // تفاعل فتح وتفاصيل الكروت
-      L.addEventListener('click', function(e) {
-        var c = e.target.closest('.card');
-        if (!c) return;
-        c.classList.toggle('open');
+      p.forEach(function(x) {
+        var c = document.createElement('div');
+        c.className = 'card';
+        c.dataset.t = (x.type  '') + ' ' + (x.certainty  '');
+        
+        var img = x.image ? '<img src="' + x.image + '" alt="صورة مرفقة">' : '';
+        
+        c.innerHTML = '<h3>' + (x.title || 'بدون عنوان') + '</h3>' +
+                      '<p>' + (x.body || '') + '</p>' +
+                      img +
+                      '<div class="meta"><span class="k">' + (x.type || 'ARCHIVE') + '</span><span class="ago">' + ago(x.time) + '</span></div>';
+        L.appendChild(c);
       });
     }
+
+    // تفعيل التفاعلات (السلايدر، الفلترة، والطي/التوسيع)
+    function init() {
+      var L = document.getElementById('list');
+      var cs = Array.prototype.slice.call(L.children);
+      if(cs.length === 0) return;
+      var si = 0, sl = document.getElementById('sl'), dots = document.getElementById('dots');
+      
+      dots.innerHTML = '';
+      cs.forEach(function(){ dots.appendChild(document.createElement('i')); });
+      
+      function show() {
+        if(!cs[si]) return;
+        var c = cs[si];
+        sl.innerHTML = '<div class="n">0' + (si+1) + ' / 0' + cs.length + '</div><h3></h3><small></small>';
+        sl.querySelector('h3').textContent = c.querySelector('h3').textContent;
+        sl.querySelector('small').textContent = c.querySelector('.k').textContent + ' · ' + c.querySelector('.ago').textContent;
+        Array.prototype.forEach.call(dots.children, function(d, i){ d.className = i === si ? 'on' : ''; });
+      }
+      
+      show();
+      setInterval(function(){ si = (si + 1) % cs.length; show(); }, 4000);
+      sl.addEventListener('click', function(){ si = (si + 1) % cs.length; show(); });
+      
+      // التبويبات والفلترة
+      document.getElementById('tabs').addEventListener('click', function(e){
+        var b = e.target.closest('.opt'); if(!b) return;
+        document.querySelectorAll('.opt').forEach(function(c){ c.classList.toggle('on', c === b); });
+        var f = b.dataset.f;
+        cs.forEach(function(c){ c.style.display = (f === 'all' || c.dataset.t.indexOf(f) > -1) ? '' : 'none'; });
+        document.getElementById('arch').scrollIntoView({ behavior: 'smooth' });
+      });
+      
+      // توسيع الكروت عند النقر
+      L.addEventListener('click', function(e){
+        var c = e.target.closest('.card'); if(!c) return; c.classList.toggle('open');
+      });
+    }
+
+    // محاكاة جلب البيانات (أو جلبها من posts.json الحقيقي لديك)
+        fetch('posts.json?' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(p){ render(p); init(); })
+      .catch(function(){ 
+        // بيانات تجريبية للعرض الفوري في المعاينة هنا
+        var mockData = [
+          { title: "رصد إشارة غير معتادة في القطاع الجنوبي", body: "تم تسجيل تدفق بيانات غامض عبر رادار الشبكة الداخلية، وتشير التحليلات الأولية إلى نشاط غير مألوف يتطلب المتابعة الفورية.", type: "مؤكد", time: new Date(Date.now() - 3600000) },
+          { title: "تحليل حركة العقد والاتصالات الرقمية", body: "دراسة تفصيلية لمسارات التوجيه وكيفية تأمين القنوات ضد الاختراقات الخارجية.", type: "تحليل", time: new Date(Date.now() - 7200000) }
+        ];
+        render(mockData);
+        init();
+      });
   </script>
 </body>
 </html>
