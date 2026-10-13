@@ -1,141 +1,96 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mystery Town | أرشيف التحليلات</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg:#11110f;--panel:#1a1916;--text:#f2ece2;--muted:#9a9084;--accent:#f97316;--line:#2e2b26}
-html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f2eb;--panel:#fff;--text:#161310;--muted:#6b6258;--accent:#ea580c;--line:#e0d8cb}}
-:root[data-theme="light"]{--bg:#f6f2eb;--panel:#fff;--text:#161310;--muted:#6b6258;--accent:#ea580c;--line:#e0d8cb}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--text);font-family:Cairo,Tahoma,"Segoe UI",sans-serif;line-height:1.8;overflow-x:hidden}
-.wrap{max-width:900px;margin:0 auto;padding:0 18px}
-.kick{color:var(--muted);letter-spacing:3px;font-size:11px;direction:ltr;text-align:start}
-#ld{position:fixed;inset:0;z-index:99;background:var(--bg);display:grid;place-items:center;text-align:center;animation:out .6s 4s forwards}
-#ld .kick{text-align:center;margin-bottom:8px;min-height:18px}
-#ld b{font-size:60px;color:var(--accent);font-weight:900;display:block;direction:ltr;line-height:1.1}
-#ld .w{display:none;font-size:clamp(34px,10vw,64px);font-weight:900;line-height:1.2;direction:ltr}
-#ld .w em{font-style:normal;color:var(--accent)}
-#ld.done .c{display:none}#ld.done .w{display:block}
-@keyframes out{to{opacity:0;visibility:hidden}}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;max-width:900px;margin:0 auto}
-.logo{font-weight:900;letter-spacing:2px}.logo i{color:var(--accent);font-style:normal}
-header a{color:var(--muted);text-decoration:none;font-size:13px;margin-inline-start:14px}
-.hero{padding:34px 0 10px;text-align:center;background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 65%)}
-h1{font-size:clamp(40px,13vw,90px);line-height:1.05;margin:8px 0;font-weight:900;direction:ltr;letter-spacing:-1px}
-h1 em{font-style:normal;color:var(--accent);display:block}
-.hero p{color:var(--muted);max-width:460px;margin:4px auto 20px}
-.sl{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;text-align:start;min-height:170px;position:relative}
-.sl .n{direction:ltr;color:var(--accent);font-weight:900;font-size:13px}
-.sl h3{margin:6px 0;font-size:22px;font-weight:900;line-height:1.5}
-.sl small{color:var(--muted)}
-.dots{display:flex;gap:6px;margin-top:12px}.dots i{height:3px;flex:1;background:var(--line)}.dots i.on{background:var(--accent)}
-section{padding:44px 0 6px}
-h2{font-size:clamp(26px,7vw,40px);margin:2px 0 6px;font-weight:900}
-h2 em{font-style:normal;color:var(--accent)}
-.sub{color:var(--muted);margin:0 0 16px}
-.sel{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{background:var(--panel);border:1px solid var(--line);color:var(--text);font:inherit;border-radius:16px;padding:18px 10px;cursor:pointer;text-align:center}
-.opt s{display:block;text-decoration:none;color:var(--accent);font-size:30px;line-height:1.1}
-.opt b{display:block;font-weight:900;font-size:17px}.opt span{color:var(--muted);font-size:12px}
-.opt.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-#list{counter-reset:a;margin-top:14px}
-.card{counter-increment:a;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px;cursor:pointer}
-.card .top{display:flex;gap:10px;font-size:11px;color:var(--muted);letter-spacing:1px;align-items:center}
-.card .top::before{content:"ARCHIVE / 00" counter(a);direction:ltr}
-.card .top .k{color:var(--accent);font-weight:700}
-.ago{margin-inline-start:auto;color:var(--text)}
-.card h3{margin:4px 0;font-size:20px;font-weight:900;line-height:1.5}
-.card p{margin:0;color:var(--muted);font-size:14.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.card.open p{display:block;color:var(--text)}
-.card .more{color:var(--accent);font-size:12px;margin-top:4px}
-.end{text-align:center;padding:52px 0 26px}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 26px;border-top:1px solid var(--line)}
-</style>
-</head>
-<body>
-<div id="ld"><div><div class="c"><div class="kick" id="ph">PREPARING THE ARCHIVE</div><b id="pc">000%</b></div><div class="w">Every Event<br><em>Analyzed.</em></div></div></div>
+.then(function(r) { return r.json(); })
+      .then(function(posts) {
+        const L = document.getElementById('list');
+        L.innerHTML = '';
+        
+        if (!posts || posts.length === 0) {
+          L.innerHTML = '<p style="color: var(--text-muted);">لا توجد تحليلات مسجلة حالياً.</p>';
+          return;
+        }
 
-<header><div class="logo">MT<i>.</i>ANALYSIS</div><div><a href="#sel">الأقسام</a><a href="#arch">الأرشيف</a></div></header>
+        posts.forEach(function(p) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.dataset.t = (p.type  '') + ' ' + (p.certainty  '');
 
-<div class="wrap">
-<div class="hero">
-<div class="kick" style="text-align:center">MYSTERY TOWN · EVENTS DESK</div>
-<h1>SEE EVERYTHING.<em>ANALYZE IT ALL.</em></h1>
-<p>نرصد الأحداث والوقائع، نفكك أسبابها، ونحفظ كل شيء في أرشيف واحد.</p>
-<div class="sl" id="sl"></div>
-<div class="dots" id="dots"></div>
-</div>
+          let imageTag = '';
+          if (p.image) {
+            imageTag = <img src="${p.image}" alt="مرفق تحليل">;
+          }
 
-<section id="sel">
-<div class="kick">CHOOSE YOUR SECTION</div>
-<h2>اختر <em>قسمك.</em></h2>
-<p class="sub">اضغط على بطاقة لتصفية الأرشيف.</p>
-<div class="sel" id="tabs">
-<button class="opt on" data-f="all"><s>♦</s><b>الكل</b><span>كل التحليلات</span></button>
-<button class="opt" data-f="حدث"><s>♥</s><b>أحداث</b><span>ما جرى في المدينة</span></button>
-<button class="opt" data-f="واقعة"><s>♠</s><b>وقائع</b><span>قضايا وتحقيقات</span></button>
-<button class="opt" data-f="لغز"><s>♣</s><b>ألغاز</b><span>رسائل وأحاجٍ</span></button>
-</div>
-</section>
+          card.innerHTML = 
+            <h3>${p.title || 'حدث جديد'}</h3>
+            <p>${p.body || ''}</p>
+            ${imageTag}
+            <div class="meta-info">
+              <span class="k">${p.type || 'ARCHIVE'}</span>
+              <span class="ago">${timeAgo(p.time)}</span>
+            </div>
+          ;
+          L.appendChild(card);
+        });
 
-<section id="arch">
-<div class="kick">THE ANALYSIS ARCHIVE</div>
-<h2>لحظات تمر. <em>وتحليلاتها تبقى.</em></h2>
-<div id="list"></div>
-</section>
+        // تفعيل السلايدر والتبويبات والتفاعل الحركي الأصلي للموقع
+        initDynamicFeatures(L);
+      })
+      .catch(function() {
+        document.getElementById('list').innerHTML = '<p style="color: var(--text-muted);">تعذّر تحميل التحليلات حالياً.</p>';
+      });
 
-<div class="end"><div class="kick" style="text-align:center">MORE ANALYSES. SOON.</div><h2>المزيد <em>قريباً.</em></h2></div>
-<footer>© 2026 · التحليلات مبنية على منشورات المجتمع وقت التصوير</footer>
-</div>
-<script>
-var ld=document.getElementById('ld'),pc=document.getElementById('pc'),ph=document.getElementById('ph'),n=0,T=['PREPARING THE ARCHIVE','CONNECTING THE EVENTS','THE ANALYSIS IS LOADING.'];
-var iv=setInterval(function(){n=Math.min(100,n+3);pc.textContent=('00'+n).slice(-3)+'%';ph.textContent=T[Math.min(2,Math.floor(n/34))];
-if(n>=100){clearInterval(iv);ld.className='done';ld.style.animationDelay='1.4s'}},45);
-function ar(n,a,b,c,d){return n===1?a:n===2?b:n<=10?n+' '+c:n+' '+d}
-function ago(){document.querySelectorAll('.ago').forEach(function(t){var dt=new Date(t.getAttribute('datetime')),s=(Date.now()-dt.getTime())/1000,r;
-if(s<60)r='الآن';
-else if(s<3600){var m=Math.floor(s/60);r='قبل '+ar(m,'دقيقة','دقيقتين','دقائق','دقيقة')}
-else if(s<86400){var h=Math.floor(s/3600);r='قبل '+ar(h,'ساعة','ساعتين','ساعات','ساعة')}
-else{var d=Math.floor(s/86400);r='قبل '+ar(d,'يوم','يومين','أيام','يوماً')}
-t.textContent=r;try{t.title=dt.toLocaleString('ar-EG')}catch(e){}})}
-function render(posts){var L=document.getElementById('list');
-function s(c,t){var e=document.createElement('span');if(c)e.className=c;e.textContent=t;return e}
-posts.forEach(function(p){var d=document.createElement('div');d.className='card';d.dataset.t=[p.type].concat(p.tags||[]).join(' ');
-var top=document.createElement('div');top.className='top';top.appendChild(s('k',p.type));top.appendChild(s('',p.certainty));
-var tm=document.createElement('time');tm.className='ago';tm.setAttribute('datetime',p.time);top.appendChild(tm);
-var hh=document.createElement('h3');hh.textContent=p.title;var pp=document.createElement('p');pp.textContent=p.body;
-d.appendChild(top);d.appendChild(hh);d.appendChild(pp);
-if(p.body.length>140){var m=document.createElement('div');m.className='more';m.textContent='اضغط للتفاصيل';d.appendChild(m)}
-L.appendChild(d)})}
-function init(){
-var L=document.getElementById('list');if(!L.children.length)return;
-Array.prototype.slice.call(L.children).sort(function(a,b){return new Date(b.querySelector('.ago').getAttribute('datetime'))-new Date(a.querySelector('.ago').getAttribute('datetime'))}).forEach(function(c){L.appendChild(c)});
-ago();setInterval(ago,30000);
-var cs=Array.prototype.slice.call(L.children),si=0,sl=document.getElementById('sl'),dots=document.getElementById('dots');
-cs.forEach(function(){dots.appendChild(document.createElement('i'))});
-function show(){var c=cs[si];sl.innerHTML='<div class="n">0'+(si+1)+' / 0'+cs.length+'</div><h3></h3><small></small>';
-sl.querySelector('h3').textContent=c.querySelector('h3').textContent;
-sl.querySelector('small').textContent=c.querySelector('.k').textContent+' · '+c.querySelector('.ago').textContent;
-Array.prototype.forEach.call(dots.children,function(d,i){d.className=i===si?'on':''})}
-show();setInterval(function(){si=(si+1)%cs.length;show()},4000);
-sl.addEventListener('click',function(){si=(si+1)%cs.length;show()});
-document.getElementById('tabs').addEventListener('click',function(e){
-var b=e.target.closest('.opt');if(!b)return;
-document.querySelectorAll('.opt').forEach(function(c){c.classList.toggle('on',c===b)});
-var f=b.dataset.f;
-cs.forEach(function(c){c.style.display=(f==='all'||c.dataset.t.split(' ').indexOf(f)>-1)?'':'none'});
-document.getElementById('arch').scrollIntoView()});
-L.addEventListener('click',function(e){
-var c=e.target.closest('.card');if(!c)return;c.classList.toggle('open');
-var m=c.querySelector('.more');if(m)m.textContent=c.classList.contains('open')?'إخفاء':'اضغط للتفاصيل'});
-}
-fetch('posts.json?'+Date.now()).then(function(r){return r.json()}).then(function(p){render(p);init()}).catch(function(){document.getElementById('list').textContent='تعذّر تحميل التحليلات'});
-</script>
+    function initDynamicFeatures(L) {
+      var cs = Array.prototype.slice.call(L.children);
+      if (cs.length === 0) return;
+
+      var si = 0;
+      var sl = document.getElementById('sl');
+      var dots = document.getElementById('dots');
+
+      cs.forEach(function() {
+        dots.appendChild(document.createElement('i'));
+      });
+
+      function show() {
+        if (!cs[si]) return;
+        var c = cs[si];
+        sl.innerHTML = '<div class="n">0' + (si + 1) + ' / 0' + cs.length + '</div><h3></h3><small></small>';
+        sl.querySelector('h3').textContent = c.querySelector('h3').textContent;
+        sl.querySelector('small').textContent = c.querySelector('.k').textContent + ' · ' + c.querySelector('.ago').textContent;
+        Array.prototype.forEach.call(dots.children, function(d, i) {
+          d.className = i === si ? 'on' : '';
+        });
+      }
+
+      show();
+      
+      var sliderTimer = setInterval(function() {
+        si = (si + 1) % cs.length;
+        show();
+      }, 4000);
+
+      sl.addEventListener('click', function() {
+        si = (si + 1) % cs.length;
+        show();
+      });
+
+      // نظام التبويبات والتصفية
+      document.getElementById('tabs').addEventListener('click', function(e) {
+        var b = e.target.closest('.opt');
+        if (!b) return;
+        document.querySelectorAll('.opt').forEach(function(c) { c.classList.toggle('on', c === b); });
+        var f = b.dataset.f;
+        cs.forEach(function(c) {
+          c.style.display = (f === 'all' || c.dataset.t.indexOf(f) > -1) ? '' : 'none';
+        });
+        document.getElementById('arch').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      // تفاعل فتح وتفاصيل الكروت
+      L.addEventListener('click', function(e) {
+        var c = e.target.closest('.card');
+        if (!c) return;
+        c.classList.toggle('open');
+      });
+    }
+  </script>
 </body>
 </html>
