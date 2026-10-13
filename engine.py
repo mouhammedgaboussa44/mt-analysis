@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 TOKEN = os.environ["TELEGRAM_TOKEN"]
 CHAT = str(os.environ["TELEGRAM_CHAT_ID"])
 KEY = os.environ["GEMINI_API_KEY"]
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
 
 PROMPT = """أنت محلل أحداث لموقع عن مجتمع Mystery Town (لعبة رول بلاي). حلل النص التالي واكتب بطاقة.
 القواعد: لا تضف أي اسم أو واقعة غير موجودة في النص. ما كان تفسيراً منك اكتبه كقراءة وليس كحقيقة. إن كان النص غير كافٍ أعد {"skip": true}.
@@ -43,7 +43,7 @@ def analyze(text):
     errs = []
     body = {"contents": [{"parts": [{"text": PROMPT + text[:4000]}]}],
             "generationConfig": {"responseMimeType": "application/json"}}
-    models = [MODEL, "gemini-2.5-flash-lite", "gemini-flash-latest"]
+    models = [MODEL, "gemini-1.5-flash-lite", "gemini-1.5-flash"]
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={KEY}"
         for attempt in (1, 2):
