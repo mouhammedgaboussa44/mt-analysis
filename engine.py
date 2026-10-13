@@ -23,10 +23,10 @@ def save(path, obj):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=1)
 
-def post_json(url, body):
+def post_json(url, body, timeout=60):
     req = urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.load(r)
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", "replace")[:400]
@@ -40,18 +40,26 @@ LAST_ERR = ""
 
 def analyze(text):
     global LAST_ERR
-    LAST_ERR = ""
+    errs = []
     body = {"contents": [{"parts": [{"text": PROMPT + text[:4000]}]}],
             "generationConfig": {"responseMimeType": "application/json"}}
-    for model in [MODEL, "gemini-flash-latest"]:
+    models = [MODEL, "gemini-2.5-flash-lite", "gemini-flash-latest"]
+    for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={KEY}"
-        try:
-            res = post_json(url, body)
-            raw = res["candidates"][0]["content"]["parts"][0]["text"]
-            return json.loads(raw)
-        except Exception as e:
-            LAST_ERR = f"[{model}] {e}"
-            print("gemini error:", LAST_ERR)
+        for attempt in (1, 2):
+            try:
+                res = post_json(url, body, timeout=40)
+                raw = res["candidates"][0]["content"]["parts"][0]["text"]
+                LAST_ERR = ""
+                return json.loads(raw)
+            except Exception as e:
+                msg = str(e).replace("\n", " ")
+                errs.append(f"[{model}#{attempt}] {msg[:140]}")
+                print("gemini error:", errs[-1])
+                if "400" in msg or "403" in msg or "404" in msg:
+                    break
+                time.sleep(4)
+    LAST_ERR = "\n".join(errs)
     return None
 
 def clean(d):
@@ -80,7 +88,7 @@ def on_message(m, uid, state):
     if not card:
         msg = "لم أستطع كتابة تحليل من هذا النص. أضف تفاصيل أو أعد الإرسال لاحقاً."
         if LAST_ERR:
-            msg = "خطأ من Gemini:\n" + LAST_ERR[:700]
+            msg = "خطأ من Gemini:\n" + LAST_ERR[:1500]
         tg("sendMessage", chat_id=CHAT, text=msg)
         return
     when = (m.get("forward_origin") or {}).get("date") or m["date"]
